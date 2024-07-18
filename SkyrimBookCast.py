@@ -1,4 +1,4 @@
-from bookScraper import scrape, Book
+from bookScraper import get_books, Book
 from gtts import gTTS
 import os
 
@@ -18,7 +18,8 @@ def book_to_audio(book: Book) -> None:
     audio.save(filename)
   return filename
 
-books = scrape()
-for book in books[1:2]:
-  audio_filename = book_to_audio(book)
-  os.system(f"start {audio_filename}")
+if __name__ == '__main__':
+  books = get_books()
+  for book in books:
+    audio_filename = book_to_audio(book)
+    os.system(f"start {audio_filename}")
