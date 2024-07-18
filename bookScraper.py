@@ -6,6 +6,7 @@ from typing import TypedDict
 
 class Book(TypedDict):
   book_links_file = 'book_links.json'
+  max_books = 533
   """File where link to each book is cached"""
   title: str
   file_name: str
@@ -17,14 +18,13 @@ def _get_cached_books() -> dict:
     return parse(Book.book_links_file)
   except:
     return None
-def _save_cached_books(books: dict) -> None: serialize(books, Book.book_links_file)
+def _save_cached_books(books) -> None: serialize(books, Book.book_links_file)
 def _clean_file_name (file_name: str) -> str: return re.sub('[ ,:.]', '_', file_name)
 
-def _get_books_uesp () -> list:
+def _get_books_uesp (limit = 5) -> list:
   """ Retrieving link to books from UESP, should return 533 links. """
-  url = 'https://en.uesp.net/wiki/Skyrim:Books'
   driver = webdriver.Chrome()
-  driver.get(url)
+  driver.get('https://en.uesp.net/wiki/Skyrim:Books')
 
   table = driver.find_element(By.ID, 'collapsibleTable0')
   rows = table.find_elements(By.TAG_NAME, 'tr')
@@ -44,30 +44,17 @@ def _get_books_uesp () -> list:
     }
     books.append(book)
     
+  limit = limit if limit > Book.max_books else Book.max_books
+  for book in books[0:limit]:
+    # TODO: first letter in first paragraph is not a text, but an image
+    driver.get(book['link'])
+    book['contents'] = driver.find_element(By.CLASS_NAME, 'book').text
   return books
 # end get_books
 
-def _get_books () -> dict:
-  """if book title and url list is cached, retrieve from cache; retrieve from uesp otherwise."""
+def get_books() -> dict:
   books = _get_cached_books()
-  if (books == None):
+  if books == None:
     books = _get_books_uesp()
     _save_cached_books(books)
-  return books
-
-def _get_book_contents_uesp(url) -> str:
-  """Get book contents for each link."""
-  """TODO: first letter in first paragraph is not a text, but an image"""
-  driver = webdriver.Chrome()
-  driver.get(url)
-  book_contents = driver.find_element(By.CLASS_NAME, 'book')
-  return book_contents.text
-# end get_book_contents
-
-def scrape() -> dict:
-  books =_get_books()
-  for book in books[0:5]:
-    if ('contents' not in book):
-      book['contents'] = _get_book_contents_uesp(book['link'])
-  _save_cached_books(books)
   return books
