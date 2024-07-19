@@ -1,4 +1,6 @@
 .venv/*
 __pycache__/*
+htmlcov/*
 *.mp3
 book_links.json
+.coverage

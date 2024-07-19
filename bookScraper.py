@@ -21,7 +21,7 @@ def _get_cached_books() -> dict:
 def _save_cached_books(books) -> None: serialize(books, Book.book_links_file)
 def _clean_file_name (file_name: str) -> str: return re.sub('[ ,:.]', '_', file_name)
 
-def _get_books_uesp (limit = 5) -> list:
+def _get_books_uesp (limit = 5) -> list: # pragma: no cover
   """ Retrieving link to books from UESP, should return 533 links. """
   driver = webdriver.Chrome()
   driver.get('https://en.uesp.net/wiki/Skyrim:Books')
